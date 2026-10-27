@@ -1,0 +1,18 @@
+<!-- Shared site header. Edit here, then run: npm run build -->
+<!-- {{current:name}} is replaced with aria-current="page" on the matching page. -->
+<header class="site-header">
+  <div class="container">
+    <a class="logo" href="index.html">
+      <img src="assets/logo/mft-logo-transparent.png" alt="Meridian Flow Technologies (MFT) home" width="2263" height="725">
+    </a>
+    <button class="nav-toggle" aria-controls="site-nav" aria-expanded="false">Menu</button>
+    <nav class="nav" id="site-nav" aria-label="Main">
+      <ul class="nav-list">
+        <li><a href="about.html"{{current:about}}>About</a></li>
+        <li><a href="services.html"{{current:services}}>Services</a></li>
+        <li><a href="markets.html"{{current:markets}}>Markets</a></li>
+        <li><a href="contact.html"{{current:contact}}>Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
