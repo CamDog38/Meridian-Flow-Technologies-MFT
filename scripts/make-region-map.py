@@ -5,7 +5,7 @@ temp file before running:
 https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson
 
 Run from the project root:  python scripts/make-region-map.py
-Output: assets/graphics/regions-map.svg
+Output: assets/graphics/middle-east-africa-dot-map-focus-markets.svg
 """
 
 import json
