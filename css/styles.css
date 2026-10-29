@@ -958,6 +958,33 @@ p {
   color: var(--color-grey);
 }
 
+.footer-qr {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  color: var(--color-grey);
+}
+
+.footer-qr img {
+  width: 120px;
+  height: 120px;
+  padding: 8px;
+  background: var(--color-white);
+  border-radius: 6px;
+  flex: 0 0 auto;
+}
+
+.footer-qr span {
+  max-width: 130px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.footer-qr:hover span {
+  color: var(--color-gold);
+}
+
 .footer-bottom {
   display: flex;
   flex-wrap: wrap;
