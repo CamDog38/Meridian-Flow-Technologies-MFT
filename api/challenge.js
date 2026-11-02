@@ -1,4 +1,5 @@
 // GET /api/challenge: returns a fresh question and a signed token for the contact form.
+// Requires CHALLENGE_SECRET. Tokens expire after 10 minutes and are checked by api/contact.js.
 import { issueChallenge } from "../lib/challenge.js";
 
 export default function handler(req, res) {
