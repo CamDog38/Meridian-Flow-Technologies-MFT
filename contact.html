@@ -76,7 +76,7 @@
           <h2>Send an enquiry</h2>
           <p class="enquiry__intro">Tell us a little about your business and what you're looking to achieve. We'll be pleased to explore how MFT can support your objectives.</p>
 
-          <form class="enquiry-form" action="#" method="post" novalidate>
+          <form class="enquiry-form" action="/api/contact" method="post" novalidate>
             <div class="enquiry-form__row">
               <div>
                 <label for="full-name" class="visually-hidden">Full name</label>
@@ -120,6 +120,7 @@
               <textarea id="message" name="message" placeholder="How can we help? *" required></textarea>
             </div>
             <button class="enquiry-form__submit" type="submit">Send enquiry</button>
+            <p class="enquiry-form__status" role="status" aria-live="polite"></p>
             <p class="enquiry-form__note">Your information will be treated confidentially and used only to respond to your enquiry.</p>
           </form>
         </div>
@@ -166,5 +167,6 @@
 </footer>
 
   <script src="js/main.js"></script>
+  <script src="js/contact-form.js"></script>
 </body>
 </html>

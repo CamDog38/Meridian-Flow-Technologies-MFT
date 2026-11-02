@@ -6,5 +6,8 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs"
+  },
+  "dependencies": {
+    "nodemailer": "^6.10.1"
   }
 }
