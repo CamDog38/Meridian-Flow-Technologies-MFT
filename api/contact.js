@@ -53,11 +53,6 @@ export default async function handler(req, res) {
 
   const body = typeof req.body === "string" ? safeParse(req.body) : req.body || {};
 
-  // Honeypot: real visitors never see or fill this field. Pretend success so bots don't retry.
-  if (clean(body.website)) {
-    return res.status(200).json({ ok: true });
-  }
-
   const fields = {
     fullName: clean(body.fullName),
     company: clean(body.company),
