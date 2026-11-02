@@ -1,6 +1,6 @@
-// Vercel serverless function: receives the contact form and sends it by SMTP.
+// Vercel serverless function: receives the contact form and sends it through Resend.
 // Credentials come from environment variables (see .env.example). Never hard-code them.
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 const MAX_FIELD = 2000;
 
@@ -15,6 +15,14 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+function safeParse(text) {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {};
+  }
 }
 
 export default async function handler(req, res) {
@@ -41,19 +49,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ ok: false, error: "Please enter a valid email address." });
   }
 
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, CONTACT_FROM, CONTACT_TO } = process.env;
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS || !CONTACT_FROM || !CONTACT_TO) {
-    console.error("Contact form: SMTP environment variables are not set.");
+  const { RESEND_API_KEY, CONTACT_FROM, CONTACT_TO } = process.env;
+  if (!RESEND_API_KEY || !CONTACT_FROM || !CONTACT_TO) {
+    console.error("Contact form: RESEND_API_KEY, CONTACT_FROM or CONTACT_TO is not set.");
     return res.status(500).json({ ok: false, error: "The enquiry could not be sent. Please try again later." });
   }
-
-  const transporter = nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: Number(SMTP_PORT) || 587,
-    secure: false,
-    requireTLS: true,
-    auth: { user: SMTP_USER, pass: SMTP_PASS },
-  });
 
   const rows = [
     ["Full name", fields.fullName],
@@ -85,25 +85,23 @@ export default async function handler(req, res) {
   `;
 
   try {
-    await transporter.sendMail({
-      from: `"MFT Website" <${CONTACT_FROM}>`,
-      to: CONTACT_TO,
+    const resend = new Resend(RESEND_API_KEY);
+    const { error } = await resend.emails.send({
+      from: `MFT Website <${CONTACT_FROM}>`,
+      to: [CONTACT_TO],
       replyTo: fields.email,
       subject: `Website enquiry from ${fields.fullName} (${fields.company})`,
       text,
       html,
     });
+
+    if (error) {
+      console.error("Contact form: Resend rejected the email:", error.name, error.message);
+      return res.status(502).json({ ok: false, error: "The enquiry could not be sent. Please try again later." });
+    }
     return res.status(200).json({ ok: true });
   } catch (err) {
-    console.error("Contact form: SMTP send failed:", err.code || err.message);
+    console.error("Contact form: Resend request failed:", err.message);
     return res.status(502).json({ ok: false, error: "The enquiry could not be sent. Please try again later." });
-  }
-}
-
-function safeParse(text) {
-  try {
-    return JSON.parse(text);
-  } catch {
-    return {};
   }
 }
