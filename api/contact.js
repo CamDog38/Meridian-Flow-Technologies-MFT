@@ -1,8 +1,11 @@
 // Vercel serverless function: receives the contact form and sends it through Resend.
 // Credentials come from environment variables (see .env.example). Never hard-code them.
 import { Resend } from "resend";
+import { verifyChallenge } from "../lib/challenge.js";
 
 const MAX_FIELD = 2000;
+const ALLOWED_HOSTS = ["mft-me.com", "www.mft-me.com", "localhost", "127.0.0.1"];
+const ALLOWED_SUFFIXES = [".vercel.app"];
 
 function clean(value) {
   return String(value ?? "").trim().slice(0, MAX_FIELD);
@@ -25,13 +28,36 @@ function safeParse(text) {
   }
 }
 
+// Browsers send Origin on cross-site POSTs. Reject requests from other sites.
+function originAllowed(req) {
+  const origin = req.headers.origin;
+  if (!origin) return true;
+  let host;
+  try {
+    host = new URL(origin).hostname;
+  } catch {
+    return false;
+  }
+  return ALLOWED_HOSTS.includes(host) || ALLOWED_SUFFIXES.some((s) => host.endsWith(s));
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ ok: false, error: "Method not allowed." });
   }
 
+  if (!originAllowed(req)) {
+    return res.status(403).json({ ok: false, error: "Request not allowed." });
+  }
+
   const body = typeof req.body === "string" ? safeParse(req.body) : req.body || {};
+
+  // Honeypot: real visitors never see or fill this field. Pretend success so bots don't retry.
+  if (clean(body.website)) {
+    return res.status(200).json({ ok: true });
+  }
+
   const fields = {
     fullName: clean(body.fullName),
     company: clean(body.company),
@@ -49,10 +75,16 @@ export default async function handler(req, res) {
     return res.status(400).json({ ok: false, error: "Please enter a valid email address." });
   }
 
-  const { RESEND_API_KEY, CONTACT_FROM, CONTACT_TO } = process.env;
-  if (!RESEND_API_KEY || !CONTACT_FROM || !CONTACT_TO) {
-    console.error("Contact form: RESEND_API_KEY, CONTACT_FROM or CONTACT_TO is not set.");
+  const { RESEND_API_KEY, CONTACT_FROM, CONTACT_TO, CHALLENGE_SECRET } = process.env;
+  if (!RESEND_API_KEY || !CONTACT_FROM || !CONTACT_TO || !CHALLENGE_SECRET) {
+    console.error("Contact form: RESEND_API_KEY, CONTACT_FROM, CONTACT_TO or CHALLENGE_SECRET is not set.");
     return res.status(500).json({ ok: false, error: "The enquiry could not be sent. Please try again later." });
+  }
+
+  const check = verifyChallenge(CHALLENGE_SECRET, clean(body.challengeToken), clean(body.challengeAnswer));
+  if (!check.ok) {
+    console.warn("Contact form: challenge failed:", check.reason);
+    return res.status(400).json({ ok: false, error: "The check question was not answered correctly. Please try again." });
   }
 
   const rows = [

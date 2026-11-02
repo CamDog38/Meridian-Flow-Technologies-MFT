@@ -119,6 +119,15 @@
               <label for="message" class="visually-hidden">Your message</label>
               <textarea id="message" name="message" placeholder="How can we help? *" required></textarea>
             </div>
+            <div class="enquiry-form__check">
+              <label for="challenge-answer" id="challenge-question">Loading check question...</label>
+              <input id="challenge-answer" name="challengeAnswer" type="text" autocomplete="off" required>
+              <input type="hidden" name="challengeToken" value="">
+            </div>
+            <div class="enquiry-form__hp" aria-hidden="true">
+              <label for="website">Leave this field empty</label>
+              <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+            </div>
             <button class="enquiry-form__submit" type="submit">Send enquiry</button>
             <p class="enquiry-form__status" role="status" aria-live="polite"></p>
             <p class="enquiry-form__note">Your information will be treated confidentially and used only to respond to your enquiry.</p>
